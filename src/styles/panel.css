@@ -1,0 +1,283 @@
+.exhibition-panel {
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.exhibition-face {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 817 / 772;
+  border-radius: 5px;
+  box-shadow:
+    0 2px 2px #0003,
+    0 12px 25px #0002;
+  isolation: isolate;
+}
+
+.exhibition-face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: url('/media/panel.webp');
+  background-size: 188.005% 132.642%;
+  background-position: 26.426% 44.048%;
+}
+
+.panel-screw {
+  position: absolute;
+  width: 3.4%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 0.5px solid #80878c;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f0f3f4, #c6cdd1 48%, #929ba2);
+  box-shadow:
+    0 1px 1px #0003,
+    inset 0 0.5px 0.5px #fff9;
+  pointer-events: none;
+}
+
+.panel-screw::after {
+  content: '';
+  position: absolute;
+  left: 17%;
+  top: 44%;
+  width: 66%;
+  height: 12%;
+  min-height: 1px;
+  border-radius: 0.5px;
+  background: #4f585e;
+}
+
+.panel-screw--top-left {
+  left: 4.16%;
+  top: 4.92%;
+}
+
+.panel-screw--top-right {
+  left: 95.84%;
+  top: 4.92%;
+}
+
+.panel-screw--bottom-left {
+  left: 4.16%;
+  top: 95.08%;
+}
+
+.panel-screw--bottom-right {
+  left: 95.84%;
+  top: 95.08%;
+}
+
+html[data-theme='dark'] .exhibition-face::before {
+  filter: grayscale(1) brightness(0.22);
+}
+
+html[data-theme='dark'] .exhibition-face {
+  border: 1px solid #565c64;
+  box-shadow:
+    0 2px 2px #0007,
+    0 12px 25px #0004;
+}
+
+html[data-theme='dark'] .exhibition-hints {
+  color: #cbd1da;
+}
+
+html[data-theme='dark'] .exhibition-recall {
+  border: 2px solid #626a75;
+  background: radial-gradient(circle at 40% 30%, #444b55, #20252c 70%);
+  box-shadow:
+    0 2px 4px #0007,
+    inset 0 1px 1px #a9b3c233;
+}
+
+html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:first-child {
+  stop-color: #e0e7ee;
+}
+
+html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:nth-child(2) {
+  stop-color: #b8c2cd;
+}
+
+html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-child {
+  stop-color: #8794a3;
+}
+
+.exhibition-lcd {
+  position: absolute;
+  left: 19.1%;
+  top: 17.62%;
+  width: 59.36%;
+  height: 16.97%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 1.2% 2.5%;
+  border-radius: 2px;
+  background: linear-gradient(120deg, #0429cc, #071b99);
+  box-shadow: inset 0 2px 5px #0007;
+  color: #d3e6ff;
+  font: 500 clamp(13px, 5.1cqw, 36px) / 1.15 var(--mono, monospace);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-shadow: 0 0 3px #b6dbff88;
+}
+
+.exhibition-hardware {
+  position: absolute;
+  width: 18%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+
+.exhibition-hardware--tune {
+  left: 34.27%;
+  top: 79.14%;
+}
+
+.exhibition-hardware--preset {
+  left: 78.95%;
+  top: 79.14%;
+}
+
+.exhibition-hardware--recall {
+  left: 79.07%;
+  top: 54.14%;
+  width: 14.5%;
+}
+
+.exhibition-dial,
+.exhibition-recall {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.exhibition-dial {
+  touch-action: none;
+}
+
+.exhibition-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: translateY(0) scale(1);
+  transform-origin: center;
+  transition:
+    transform 110ms cubic-bezier(0.2, 0.75, 0.35, 1.2),
+    filter 110ms ease;
+}
+
+.exhibition-dial svg.is-pressed,
+.exhibition-dial svg.is-click-pulse {
+  transform: translateY(2px) scale(0.94);
+  filter: drop-shadow(0 1px 1px #0006);
+}
+
+.exhibition-recall {
+  transform: translateY(0) scale(1);
+  transition:
+    transform 100ms cubic-bezier(0.2, 0.75, 0.35, 1.2),
+    box-shadow 100ms ease;
+}
+
+.exhibition-recall.is-pressed,
+.exhibition-recall.is-click-pulse {
+  transform: translateY(2px) scale(0.94);
+  box-shadow:
+    inset 0 3px 7px #0005,
+    0 0 0 1px #0002;
+}
+.exhibition-dial:active,
+.exhibition-recall:active {
+  background: #0002;
+  box-shadow: inset 0 2px 8px #0005;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exhibition-dial svg,
+  .exhibition-recall {
+    transition-duration: 0.01ms;
+  }
+}
+
+.exhibition-dial:focus-visible,
+.exhibition-recall:focus-visible {
+  outline: 2px solid #b67b38;
+  outline-offset: 4px;
+}
+
+.exhibition-hints {
+  position: absolute;
+  top: 39%;
+  left: 16%;
+  width: 49%;
+  display: grid;
+  color: #49443b;
+  font: 11px / 1.45 var(--sans, sans-serif);
+}
+
+.exhibition-hints p {
+  grid-area: 1 / 1;
+  margin: 0;
+  visibility: hidden;
+}
+
+.exhibition-face:has(.exhibition-hardware--tune button:hover) #exhibition-tune-tip,
+.exhibition-face:has(.exhibition-hardware--preset button:hover) #exhibition-preset-tip,
+.exhibition-face:has(.exhibition-hardware--recall button:hover) #exhibition-recall-tip,
+.exhibition-face:not(:has(button:hover)):has(.exhibition-hardware--tune button:focus-visible)
+  #exhibition-tune-tip,
+.exhibition-face:not(:has(button:hover)):has(.exhibition-hardware--preset button:focus-visible)
+  #exhibition-preset-tip,
+.exhibition-face:not(:has(button:hover)):has(.exhibition-hardware--recall button:focus-visible)
+  #exhibition-recall-tip {
+  visibility: visible;
+}
+
+@media (max-width: 520px) {
+  .exhibition-lcd {
+    font-size: clamp(13px, 5.1cqw, 36px);
+  }
+
+  .exhibition-hints {
+    font-size: 10px;
+    width: 52%;
+  }
+}
+
+@media (pointer: coarse) {
+  .exhibition-hardware {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .exhibition-dial,
+  .exhibition-recall {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .exhibition-face:has(.exhibition-hardware--tune button:focus) #exhibition-tune-tip,
+  .exhibition-face:has(.exhibition-hardware--preset button:focus) #exhibition-preset-tip,
+  .exhibition-face:has(.exhibition-hardware--recall button:focus) #exhibition-recall-tip {
+    visibility: visible;
+  }
+
+  .exhibition-hints {
+    max-height: 29%;
+    overflow-y: auto;
+  }
+}

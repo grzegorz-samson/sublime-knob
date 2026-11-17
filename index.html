@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en" data-mode="exhibition" data-page="instrument" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f3efe6" />
+    <title>Sublime Knob — Interactive instrument</title>
+
+    <link rel="canonical" href="https://grzegorz-samson.github.io/sublime-knob/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta
+      name="description"
+      content="Explore and play Sublime Knob, an interactive musical instrument by Grzegorz Samson. Artistic supervision: Dr Krzysztof Cybulski."
+    />
+    <meta property="og:title" content="Sublime Knob" />
+    <meta
+      property="og:description"
+      content="An interactive musical instrument. Explore the model, play with sound and view the gallery."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://grzegorz-samson.github.io/sublime-knob/" />
+    <meta
+      property="og:image"
+      content="https://grzegorz-samson.github.io/sublime-knob/media/gallery/front.webp"
+    />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <noscript>Enable JavaScript to explore and play the instrument.</noscript>
+    <main class="page-shell">
+      <h1 class="sr-only">Sublime Knob — interactive instrument</h1>
+      <header class="topbar">
+        <a class="wordmark" href="#instrument">
+          <span class="wordmark-name">Sublime Knob</span>
+        </a>
+        <div class="topbar-actions">
+          <div class="exhibition-settings">
+            <a
+              class="gallery-nav"
+              href="#gallery"
+              id="gallery-nav"
+              aria-label="Gallery"
+              data-aria-en="Gallery"
+              data-aria-pl="Galeria"
+            >
+              <svg
+                aria-hidden="true"
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              >
+                <path d="M3 6h4l2-3h6l2 3h4v14H3Z"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              <span data-en="Gallery" data-pl="Galeria">Gallery</span>
+            </a>
+            <button type="button" id="exhibition-language" aria-label="Switch language to Polish">
+              EN
+            </button>
+            <button
+              type="button"
+              id="exhibition-theme"
+              aria-label="Dark mode"
+              title="Enable dark mode"
+              aria-pressed="false"
+            >
+              <svg
+                class="theme-moon"
+                aria-hidden="true"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20.8 15.1A8.8 8.8 0 0 1 8.9 3.2a9 9 0 1 0 11.9 11.9Z"></path>
+              </svg>
+              <svg
+                class="theme-sun"
+                aria-hidden="true"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="12" r="4"></circle>
+                <path
+                  d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42m-11.3 11.3-1.42 1.42"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="exhibition-audio-slot" id="exhibition-audio-slot">
+        <div id="exhibition-aux" class="exhibition-aux">
+          <div class="audio-controls">
+            <button id="audio-toggle" class="sim-button audio-toggle" aria-pressed="false">
+              <svg
+                class="audio-symbol"
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M11 4 6 8H2v8h4l5 4Z"></path>
+                <path class="audio-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"></path>
+                <path class="audio-slash" d="m2 2 20 20"></path>
+              </svg>
+              <span class="audio-button-label">Sound</span>
+            </button>
+            <label class="volume-control"
+              ><input
+                id="audio-volume"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+                aria-label="Volume"
+              /><output id="volume-value">50%</output></label
+            >
+          </div>
+        </div>
+      </div>
+      <section
+        class="viewer-section"
+        aria-label="Interactive 3D model"
+        data-aria-en="Interactive 3D model"
+        data-aria-pl="Interaktywny model 3D"
+      >
+        <div class="viewer-toolbar">
+          <div
+            class="view-tabs"
+            role="group"
+            aria-label="Model view"
+            data-aria-en="Model view"
+            data-aria-pl="Widok modelu"
+          >
+            <button
+              class="view-tab is-active"
+              data-view="front"
+              aria-pressed="true"
+              data-en="Front"
+              data-pl="Przód"
+            >
+              Front
+            </button>
+            <button
+              class="view-tab"
+              data-view="inside"
+              aria-pressed="false"
+              data-en="Inside"
+              data-pl="Wnętrze"
+            >
+              Inside
+            </button>
+            <button
+              class="view-tab"
+              id="exhibition-zoom"
+              data-view="display"
+              aria-pressed="false"
+              data-en="LCD"
+              data-pl="LCD"
+              disabled=""
+            >
+              LCD
+            </button>
+          </div>
+          <div class="viewer-actions">
+            <button
+              class="icon-button"
+              id="reset-view"
+              title="Reset view"
+              aria-label="Reset view"
+              data-aria-en="Reset view"
+              data-aria-pl="Przywróć widok początkowy"
+              data-title-en="Reset view"
+              data-title-pl="Przywróć widok początkowy"
+            >
+              <span aria-hidden="true">↺</span
+              ><span class="button-label" data-en="Reset" data-pl="Przywróć">Reset</span>
+            </button>
+            <button
+              class="icon-button"
+              id="fullscreen-toggle"
+              aria-pressed="false"
+              title="Fullscreen"
+              aria-label="Fullscreen"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                aria-hidden="true"
+              >
+                <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"></path></svg
+              ><span class="button-label" id="fullscreen-label">Fullscreen</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="stage-layout">
+          <div class="stage" id="stage">
+            <div class="stage-grid" aria-hidden="true"></div>
+            <span class="model-grab-hint" id="model-grab-hint" aria-hidden="true" hidden=""
+              >Grab me</span
+            >
+          </div>
+          <button
+            class="parameter-handle"
+            id="parameter-handle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="parameter-drawer"
+            data-aria-en="Open parameter panel"
+            data-aria-pl="Otwórz panel parametrów"
+            aria-label="Open parameter panel"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <aside
+            class="parameter-drawer"
+            id="parameter-drawer"
+            aria-label="Instrument controls"
+            data-aria-en="Instrument controls"
+            data-aria-pl="Sterowanie instrumentem"
+            hidden=""
+          ></aside>
+        </div>
+
+        <div class="viewer-feedback">
+          <div class="model-loader is-hidden" id="model-loader" role="status" aria-live="polite">
+            <span class="loader-ring" aria-hidden="true"></span>
+            <span
+              class="loader-title"
+              data-en="Loading the instrument…"
+              data-pl="Przygotowuję model…"
+              >Loading the instrument…</span
+            >
+          </div>
+          <div class="model-error" id="model-error" role="alert" hidden="">
+            <span class="error-symbol" aria-hidden="true">!</span>
+            <strong data-en="Could not open the model" data-pl="Nie udało się otworzyć modelu"
+              >Could not open the model</strong
+            >
+            <p id="error-message">
+              The instrument could not be loaded. Reload the page to try again.
+            </p>
+          </div>
+          <span id="status-indicator" hidden=""><span id="status-text">Loading</span></span>
+        </div>
+
+        <section
+          class="instrument-panel"
+          aria-label="Instrument controls"
+          data-aria-en="Instrument controls"
+          data-aria-pl="Sterowanie instrumentem"
+        >
+          <div class="exhibition-instrument">
+            <div class="exhibition-panel" id="exhibition-panel"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="exhibition-gallery" id="exhibition-gallery" aria-labelledby="gallery-title">
+        <div class="gallery-heading">
+          <h2 id="gallery-title" tabindex="-1" data-en="Gallery" data-pl="Galeria">Gallery</h2>
+          <a class="gallery-back" href="#instrument"
+            ><span aria-hidden="true">←</span>
+            <span data-en="Back to the instrument" data-pl="Wróć do instrumentu"
+              >Back to the instrument</span
+            ></a
+          >
+        </div>
+        <div class="gallery-grid">
+          <button
+            class="gallery-image"
+            type="button"
+            data-caption-en="Front view"
+            data-caption-pl="Widok z przodu"
+            data-aria-en="Enlarge front view"
+            data-aria-pl="Powiększ widok z przodu"
+            aria-label="Enlarge front view"
+          >
+            <img alt="" loading="lazy" decoding="async" data-photo="front.webp" />
+          </button>
+          <button
+            class="gallery-image"
+            type="button"
+            data-caption-en="Side view"
+            data-caption-pl="Widok z boku"
+            data-aria-en="Enlarge side view"
+            data-aria-pl="Powiększ widok z boku"
+            aria-label="Enlarge side view"
+          >
+            <img alt="" loading="lazy" decoding="async" data-photo="side.webp" />
+          </button>
+          <button
+            class="gallery-image"
+            type="button"
+            data-caption-en="Controls and display"
+            data-caption-pl="Kontrolki i wyświetlacz"
+            data-aria-en="Enlarge controls and display"
+            data-aria-pl="Powiększ widok kontrolek i wyświetlacza"
+            aria-label="Enlarge controls and display"
+          >
+            <img alt="" loading="lazy" decoding="async" data-photo="controls.webp" />
+          </button>
+        </div>
+        <dialog
+          class="gallery-dialog"
+          aria-label="Product photograph"
+          data-aria-en="Product photograph"
+          data-aria-pl="Zdjęcie produktu"
+        >
+          <button
+            class="gallery-close"
+            type="button"
+            data-aria-en="Close photograph"
+            data-aria-pl="Zamknij zdjęcie"
+            aria-label="Close photograph"
+            autofocus=""
+          >
+            ×
+          </button>
+          <figure class="gallery-figure">
+            <img class="gallery-dialog-image" alt="" />
+            <figcaption class="gallery-dialog-caption"></figcaption>
+          </figure>
+        </dialog>
+      </section>
+
+      <footer class="footer">
+        <div class="credits">
+          <span
+            data-en="Artistic supervision: Dr Krzysztof Cybulski"
+            data-pl="Opieka artystyczna: dr Krzysztof Cybulski"
+            >Artistic supervision: Dr Krzysztof Cybulski</span
+          >
+          <span>Grzegorz Samson</span>
+        </div>
+        <span
+          data-en="The Feliks Nowowiejski Academy of Music in Bydgoszcz"
+          data-pl="Akademia Muzyczna imienia Feliksa Nowowiejskiego w Bydgoszczy"
+          >The Feliks Nowowiejski Academy of Music in Bydgoszcz</span
+        >
+      </footer>
+      <p id="instrument-message" class="sr-only" role="status" aria-live="polite"></p>
+    </main>
+  </body>
+</html>
