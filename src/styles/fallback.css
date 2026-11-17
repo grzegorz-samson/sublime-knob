@@ -1,0 +1,42 @@
+.parameter-handle[hidden] {
+  display: none;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .stage-layout,
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .view-tabs,
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] #reset-view {
+  display: none;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .viewer-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .viewer-feedback {
+  position: static;
+  flex-shrink: 0;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .model-error {
+  width: auto;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .error-symbol {
+  display: none;
+}
+
+[data-mode='exhibition'] .viewer-section[data-viewer-state='unavailable'] .model-error p {
+  font-size: 13px;
+}
+
+[data-mode='exhibition']
+  .viewer-section[data-viewer-state='unavailable']:is(:fullscreen, .is-expanded) {
+  overflow-y: auto;
+}

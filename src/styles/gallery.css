@@ -7,17 +7,15 @@ html[data-mode='exhibition'][data-page='gallery'] .viewer-section {
   display: none;
 }
 
-.gallery-nav,
-.gallery-back {
+.gallery-nav {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--ink);
   text-decoration: none;
   font-size: 12px;
-}
-
-.gallery-nav {
+  flex: 0 0 auto;
+  width: 7.5em;
   min-height: 34px;
   padding: 0 10px;
   border: 0;
@@ -25,25 +23,17 @@ html[data-mode='exhibition'][data-page='gallery'] .viewer-section {
   background: transparent;
 }
 
-.gallery-nav:hover,
-.gallery-nav[aria-current='page'] {
+.gallery-nav:hover {
   background: var(--surface-hover);
 }
 
-.gallery-back:hover {
-  color: var(--accent);
+html:not([data-page='gallery']) .gallery-nav-home,
+html[data-page='gallery'] .gallery-nav-camera {
+  display: none;
 }
 
 .gallery-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 14px;
-}
-
-.gallery-heading h2 {
-  margin: 0;
+  margin: 0 0 14px;
   color: var(--ink);
   font: 500 clamp(21px, 2.7vw, 30px) / 1.15 var(--serif);
   letter-spacing: -0.025em;
@@ -136,12 +126,8 @@ html[data-mode='exhibition'][data-page='gallery'] .viewer-section {
 }
 
 @media (max-width: 600px) {
-  .gallery-back,
   .gallery-close {
     min-height: 44px;
-  }
-
-  .gallery-close {
     min-width: 44px;
     top: 16px;
     right: 16px;
@@ -151,12 +137,6 @@ html[data-mode='exhibition'][data-page='gallery'] .viewer-section {
     max-width: calc(100vw - 16px);
     padding: 10px;
     overscroll-behavior: contain;
-  }
-
-  .gallery-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
   }
 
   .gallery-grid {

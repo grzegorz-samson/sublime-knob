@@ -44,6 +44,7 @@
               data-aria-pl="Galeria"
             >
               <svg
+                class="gallery-nav-camera"
                 aria-hidden="true"
                 width="17"
                 height="17"
@@ -55,6 +56,20 @@
               >
                 <path d="M3 6h4l2-3h6l2 3h4v14H3Z"></path>
                 <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              <svg
+                class="gallery-nav-home"
+                aria-hidden="true"
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 10 9-7 9 7M5 9v12h14V9m-10 12v-7h6v7"></path>
               </svg>
               <span data-en="Gallery" data-pl="Galeria">Gallery</span>
             </a>
@@ -282,15 +297,15 @@
       </section>
 
       <section class="exhibition-gallery" id="exhibition-gallery" aria-labelledby="gallery-title">
-        <div class="gallery-heading">
-          <h2 id="gallery-title" tabindex="-1" data-en="Gallery" data-pl="Galeria">Gallery</h2>
-          <a class="gallery-back" href="#instrument"
-            ><span aria-hidden="true">←</span>
-            <span data-en="Back to the instrument" data-pl="Wróć do instrumentu"
-              >Back to the instrument</span
-            ></a
-          >
-        </div>
+        <h2
+          class="gallery-heading"
+          id="gallery-title"
+          tabindex="-1"
+          data-en="Gallery"
+          data-pl="Galeria"
+        >
+          Gallery
+        </h2>
         <div class="gallery-grid">
           <button
             class="gallery-image"
@@ -360,7 +375,7 @@
         </div>
         <span
           data-en="The Feliks Nowowiejski Academy of Music in Bydgoszcz"
-          data-pl="Akademia Muzyczna imienia Feliksa Nowowiejskiego w Bydgoszczy"
+          data-pl="Akademia Muzyczna im. Feliksa Nowowiejskiego w Bydgoszczy"
           >The Feliks Nowowiejski Academy of Music in Bydgoszcz</span
         >
       </footer>

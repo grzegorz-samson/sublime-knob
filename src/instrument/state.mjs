@@ -24,7 +24,7 @@ export function createInstrumentState(initial = null) {
   let motorActive = false;
   let revision = 0;
 
-  // Accept a validated starting snapshot for tests or a new local instrument.
+  // Restore starting values from an optional snapshot.
   if (initial && typeof initial === 'object') {
     if (isFiniteNumber(initial.position)) position = clamp(initial.position, 0, ADC_MAX);
     if (isFiniteNumber(initial.fine))

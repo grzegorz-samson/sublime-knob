@@ -5,12 +5,18 @@ export function initGallery() {
   const largeImage = gallery.querySelector('.gallery-dialog-image');
   const caption = gallery.querySelector('.gallery-dialog-caption');
   const navigation = document.querySelector('#gallery-nav');
+  const navigationLabel = navigation.querySelector('span');
 
   function showView(focusHeading = false) {
     const isGallery = ['#gallery', '#exhibition-gallery'].includes(location.hash);
     document.documentElement.dataset.page = isGallery ? 'gallery' : 'instrument';
-    if (isGallery) navigation.setAttribute('aria-current', 'page');
-    else navigation.removeAttribute('aria-current');
+    const [en, pl] = isGallery ? ['Home', 'Start'] : ['Gallery', 'Galeria'];
+    const label = document.documentElement.lang === 'pl' ? pl : en;
+    navigation.href = isGallery ? '#instrument' : '#gallery';
+    Object.assign(navigation.dataset, { ariaEn: en, ariaPl: pl });
+    navigation.setAttribute('aria-label', label);
+    Object.assign(navigationLabel.dataset, { en, pl });
+    navigationLabel.textContent = label;
     if (dialog.open) dialog.close();
     if (isGallery) {
       for (const image of gallery.querySelectorAll('.gallery-image img')) {

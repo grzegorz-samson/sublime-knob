@@ -136,7 +136,6 @@ export class InstrumentAudio {
     const upper = this.context ? Math.min(20000, this.context.sampleRate * 0.45) : 20000;
     this.frequencyHz = clamp(hz, 20, upper);
     if (this.oscillator && this.context.state !== 'closed') {
-      // Retarget the running curve without cancelling a linear ramp mid-render.
       // A 25 ms time constant reaches about 98% of the new pitch after 100 ms.
       this.oscillator.frequency.setTargetAtTime(
         this.frequencyHz,

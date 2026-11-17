@@ -5,32 +5,31 @@
 }
 
 .exhibition-face {
+  --lcd-width: 228px;
+  --screw-inset: 12px;
   position: relative;
-  width: 100%;
-  aspect-ratio: 817 / 772;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto minmax(min-content, 1fr) auto auto;
+  grid-template-areas:
+    'lcd lcd'
+    'hints hints'
+    '. recall'
+    'tune preset';
+  gap: 24px 16px;
+  padding: 40px clamp(16px, calc((100cqw - var(--lcd-width) - 2px) / 2), 24px) 28px;
+  border: 1px solid #a8adaa;
   border-radius: 5px;
+  background: linear-gradient(135deg, #f0f0ec, #dedfdb);
   box-shadow:
     0 2px 2px #0003,
     0 12px 25px #0002;
-  isolation: isolate;
-}
-
-.exhibition-face::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background-image: url('/media/panel.webp');
-  background-size: 188.005% 132.642%;
-  background-position: 26.426% 44.048%;
 }
 
 .panel-screw {
   position: absolute;
-  width: 3.4%;
+  width: 12px;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
   border: 0.5px solid #80878c;
   border-radius: 50%;
   background: linear-gradient(145deg, #f0f3f4, #c6cdd1 48%, #929ba2);
@@ -52,32 +51,29 @@
   background: #4f585e;
 }
 
-.panel-screw--top-left {
-  left: 4.16%;
-  top: 4.92%;
-}
-
+.panel-screw--top-left,
 .panel-screw--top-right {
-  left: 95.84%;
-  top: 4.92%;
+  top: var(--screw-inset);
 }
 
-.panel-screw--bottom-left {
-  left: 4.16%;
-  top: 95.08%;
-}
-
+.panel-screw--bottom-left,
 .panel-screw--bottom-right {
-  left: 95.84%;
-  top: 95.08%;
+  bottom: var(--screw-inset);
 }
 
-html[data-theme='dark'] .exhibition-face::before {
-  filter: grayscale(1) brightness(0.22);
+.panel-screw--top-left,
+.panel-screw--bottom-left {
+  left: var(--screw-inset);
+}
+
+.panel-screw--top-right,
+.panel-screw--bottom-right {
+  right: var(--screw-inset);
 }
 
 html[data-theme='dark'] .exhibition-face {
-  border: 1px solid #565c64;
+  border-color: #565c64;
+  background: linear-gradient(135deg, #343534, #2e2e2d);
   box-shadow:
     0 2px 2px #0007,
     0 12px 25px #0004;
@@ -85,14 +81,6 @@ html[data-theme='dark'] .exhibition-face {
 
 html[data-theme='dark'] .exhibition-hints {
   color: #cbd1da;
-}
-
-html[data-theme='dark'] .exhibition-recall {
-  border: 2px solid #626a75;
-  background: radial-gradient(circle at 40% 30%, #444b55, #20252c 70%);
-  box-shadow:
-    0 2px 4px #0007,
-    inset 0 1px 1px #a9b3c233;
 }
 
 html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:first-child {
@@ -108,46 +96,53 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
 }
 
 .exhibition-lcd {
-  position: absolute;
-  left: 19.1%;
-  top: 17.62%;
-  width: 59.36%;
-  height: 16.97%;
+  grid-area: lcd;
+  justify-self: center;
+  width: min(100%, var(--lcd-width));
+  height: 64px;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  padding: 1.2% 2.5%;
+  padding: 4px 10px;
   border-radius: 2px;
   background: linear-gradient(120deg, #0429cc, #071b99);
-  box-shadow: inset 0 2px 5px #0007;
+  box-shadow:
+    inset 0 2px 5px #0007,
+    0 0 0 7px #3b4244,
+    0 1px 1px 8px #858b8b,
+    0 3px 4px 8px #0003;
   color: #d3e6ff;
-  font: 500 clamp(13px, 5.1cqw, 36px) / 1.15 var(--mono, monospace);
+  font: 500 clamp(13px, calc((100cqw - 54px) / 9), 23px) / 1.15 var(--mono, monospace);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   text-shadow: 0 0 3px #b6dbff88;
 }
 
+html[data-theme='dark'] .exhibition-lcd {
+  box-shadow:
+    inset 0 2px 5px #0007,
+    0 0 0 7px #151716,
+    0 1px 1px 8px #262927,
+    0 3px 4px 8px #0005;
+}
+
 .exhibition-hardware {
-  position: absolute;
-  width: 18%;
+  justify-self: center;
+  width: 76px;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
 }
 
 .exhibition-hardware--tune {
-  left: 34.27%;
-  top: 79.14%;
+  grid-area: tune;
 }
 
 .exhibition-hardware--preset {
-  left: 78.95%;
-  top: 79.14%;
+  grid-area: preset;
 }
 
 .exhibition-hardware--recall {
-  left: 79.07%;
-  top: 54.14%;
-  width: 14.5%;
+  grid-area: recall;
+  width: 60px;
 }
 
 .exhibition-dial,
@@ -172,6 +167,7 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter: drop-shadow(0 3px 3px #0003);
   transform: translateY(0) scale(1);
   transform-origin: center;
   transition:
@@ -186,10 +182,23 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
 }
 
 .exhibition-recall {
+  border: 2px solid #777e7f;
+  background: radial-gradient(circle at 40% 30%, #969e9d, #586160 75%);
+  box-shadow:
+    0 2px 4px #0003,
+    inset 0 1px 1px #fff5;
   transform: translateY(0) scale(1);
   transition:
     transform 100ms cubic-bezier(0.2, 0.75, 0.35, 1.2),
     box-shadow 100ms ease;
+}
+
+html[data-theme='dark'] .exhibition-recall {
+  border-color: #626a75;
+  background: radial-gradient(circle at 40% 30%, #444b55, #20252c 70%);
+  box-shadow:
+    0 2px 4px #0007,
+    inset 0 1px 1px #a9b3c233;
 }
 
 .exhibition-recall.is-pressed,
@@ -219,13 +228,11 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
 }
 
 .exhibition-hints {
-  position: absolute;
-  top: 39%;
-  left: 16%;
-  width: 49%;
+  grid-area: hints;
+  align-self: start;
   display: grid;
   color: #49443b;
-  font: 11px / 1.45 var(--sans, sans-serif);
+  font: 13px / 1.4 var(--sans, sans-serif);
 }
 
 .exhibition-hints p {
@@ -246,23 +253,7 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
   visibility: visible;
 }
 
-@media (max-width: 520px) {
-  .exhibition-lcd {
-    font-size: clamp(13px, 5.1cqw, 36px);
-  }
-
-  .exhibition-hints {
-    font-size: 10px;
-    width: 52%;
-  }
-}
-
 @media (pointer: coarse) {
-  .exhibition-hardware {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
   .exhibition-dial,
   .exhibition-recall {
     -webkit-user-select: none;
@@ -274,10 +265,5 @@ html[data-theme='dark'] .exhibition-dial linearGradient[id$='-cap'] stop:last-ch
   .exhibition-face:has(.exhibition-hardware--preset button:focus) #exhibition-preset-tip,
   .exhibition-face:has(.exhibition-hardware--recall button:focus) #exhibition-recall-tip {
     visibility: visible;
-  }
-
-  .exhibition-hints {
-    max-height: 29%;
-    overflow-y: auto;
   }
 }

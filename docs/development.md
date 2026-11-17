@@ -14,8 +14,6 @@ Use Node.js 22.12 or later with npm. Install the lockfile-defined dependencies w
 | `npm run format:check` | Check source formatting without editing files                       |
 | `npm run validate`     | Check formatting, tests, build, public output, and browser behavior |
 
-Browser checks use Chromium. Install it for a local run with `npx playwright install chromium`. GitHub Actions installs Chromium in the CI job.
+Browser checks run against Chromium, Firefox, and WebKit. Install their browser binaries locally with `npx playwright install chromium firefox webkit`; GitHub Actions installs the browsers and Linux runtime dependencies in CI.
 
-An installed Microsoft Edge can be used instead by setting `PLAYWRIGHT_CHANNEL=msedge` before running the browser checks. Tests inspect the production build at `/sublime-knob/`, including the rendered audio during a main-knob gesture. They do not require a physical audio-output device.
-
-Keep changes within the exhibition scope. Do not add workshop, electronics-simulator, source-model, or private research material to this public-ready tree. Keep third-party license notices with dependencies and do not infer reuse rights for original artwork or assets from the presence of this repository.
+The responsive-layout check runs at a narrow viewport in all three engines. A separate touch-activation check uses real Playwright touch input in Chromium and WebKit. Firefox's narrow-viewport run does not emulate a touch device because Playwright Firefox does not support the `isMobile` context option. Audio-output checks run when an engine exposes `AudioContext` or `webkitAudioContext`; otherwise tests verify the disabled unavailable-audio control while continuing the 2D and viewer-fallback checks. To run the Chromium project with an installed Microsoft Edge, set `PLAYWRIGHT_CHANNEL=msedge` before running the browser checks.

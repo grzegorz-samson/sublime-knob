@@ -1,10 +1,10 @@
 # Sublime Knob
 
-An interactive exhibition presentation of the Sublime Knob instrument. Explore its exterior and interior in 3D, inspect the recreated control panel, and hear the pitch change as you turn the main control.
+An interactive exhibition presentation of the Sublime Knob instrument. Explore its exterior and interior in 3D, use the control panel, and hear the pitch change as you turn the main control.
 
-**Live presentation:** <https://grzegorz-samson.github.io/sublime-knob/> (after a future deployment)
+**Project address:** <https://grzegorz-samson.github.io/sublime-knob/>
 
-The page supports English and Polish, light and dark themes, a product gallery, an interactive 2D panel, and a 3D view with close-up and interior controls. Audio starts after the visitor's first interaction, as required by browser audio policies. The controls and tone are a local presentation; the exhibition build has no electronics simulator, shared worker, backend, or lab synchronization.
+The page supports English and Polish, light and dark themes, a product gallery, an interactive 2D panel, and a 3D view with close-up and interior controls. Audio starts with the visitor's first interaction. The 2D controls and sound remain available when the 3D view cannot be displayed.
 
 ## Run locally
 
@@ -22,12 +22,10 @@ Vite prints the local address. To create and inspect a production build, use `np
 - `src/` — application, instrument interaction, 3D viewer, and styles
 - `public/media/` — optimized model and exhibition imagery
 - `tests/` — unit and browser checks
-- `docs/` — architecture, development, and future deployment notes
+- `docs/` — architecture, development, and deployment
 - `.github/workflows/` — validation and manually gated Pages deployment
 
-See [Development](docs/development.md) for commands and [Deployment](docs/deployment.md) for the unpublished GitHub Pages setup.
-
-The [preparation review](docs/review.md) records the cleanup, verification, and the remaining development-tool dependency advisory.
+See [Development](docs/development.md) for commands and [Deployment](docs/deployment.md) for GitHub Pages configuration.
 
 ## Credits
 

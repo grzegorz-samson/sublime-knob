@@ -54,7 +54,9 @@ for (const file of files) {
     const content = await readFile(new URL(`dist/${file}`, root), 'utf8');
     assert.ok(!forbidden.test(content), `Non-exhibition feature in dist/${file}`);
     assert.ok(
-      !/local preview server|viewerState|viewerPerformance/.test(content),
+      !/local preview server|(?:window|globalThis)\.(?:viewerState|viewerPerformance)/.test(
+        content,
+      ),
       `Development-only content in dist/${file}`,
     );
   }

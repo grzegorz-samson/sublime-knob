@@ -105,100 +105,8 @@ html[data-page='gallery'] .exhibition-audio-slot {
   justify-self: center;
 }
 
-/* Reflow the hardware on a taller plate instead of stretching the photographed controls. */
 [data-mode='exhibition'] .parameter-drawer .exhibition-face {
-  height: 100%;
-  aspect-ratio: auto;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: auto minmax(52px, 1fr) auto auto;
-  gap: clamp(12px, 5cqw, 22px);
-  padding: clamp(28px, 10cqw, 38px) clamp(20px, 8cqw, 30px) clamp(28px, 10cqw, 38px);
-  border: 1px solid #a8adaa;
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-face::before {
-  background: linear-gradient(135deg, #f0f0ec, #dedfdb);
-}
-
-html[data-theme='dark'] .parameter-drawer .exhibition-face {
-  border-color: #565c64;
-}
-
-html[data-theme='dark'] .parameter-drawer .exhibition-face::before {
-  background: linear-gradient(135deg, #343534, #2e2e2d);
-  filter: none;
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-lcd {
-  position: relative;
-  inset: auto;
-  grid-column: 1 / -1;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3.7;
-  font-size: clamp(16px, 7.2cqw, 28px);
-  box-shadow:
-    inset 0 2px 5px #0007,
-    0 0 0 7px #3b4244,
-    0 1px 1px 8px #858b8b,
-    0 3px 4px 8px #0003;
-}
-
-html[data-theme='dark'] .parameter-drawer .exhibition-lcd {
-  box-shadow:
-    inset 0 2px 5px #0007,
-    0 0 0 7px #151716,
-    0 1px 1px 8px #262927,
-    0 3px 4px 8px #0005;
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-hints {
-  position: relative;
-  inset: auto;
-  grid-column: 1 / -1;
-  width: 100%;
-  align-self: start;
-  font-size: clamp(13px, 4cqw, 17px);
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-hardware {
-  position: relative;
-  inset: auto;
-  transform: none;
-  width: clamp(56px, 26cqw, 96px);
-  justify-self: center;
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-hardware--recall {
-  grid-column: 2;
-  grid-row: 3;
-  width: clamp(44px, 20cqw, 74px);
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-hardware--tune,
-[data-mode='exhibition'] .parameter-drawer .exhibition-hardware--preset {
-  grid-row: 4;
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-dial svg {
-  filter: drop-shadow(0 3px 3px #0003);
-}
-
-[data-mode='exhibition'] .parameter-drawer .exhibition-recall {
-  border: 2px solid #777e7f;
-  background: radial-gradient(circle at 40% 30%, #969e9d, #586160 75%);
-  box-shadow:
-    0 2px 4px #0003,
-    inset 0 1px 1px #fff5;
-}
-
-html[data-theme='dark'] .parameter-drawer .exhibition-recall {
-  border-color: #626a75;
-  background: radial-gradient(circle at 40% 30%, #444b55, #20252c 70%);
-  box-shadow:
-    0 2px 4px #0007,
-    inset 0 1px 1px #a9b3c233;
+  min-height: 100%;
 }
 
 [data-mode='exhibition'] .parameter-drawer .exhibition-aux {
@@ -246,117 +154,43 @@ html[data-theme='dark'] .parameter-drawer .exhibition-recall {
   height: min(100%, calc(80cqh - 36px), 560px);
 }
 
-/* The controls beneath the model use a wider, shorter plate on desktop. */
 [data-mode='exhibition'] .viewer-section > .instrument-panel {
   container: instrument-controls / inline-size;
 }
 
-@container instrument-controls (min-width: 600px) {
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-instrument {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    gap: 0;
-  }
+[data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-panel {
+  width: min(100%, 390px);
+  justify-self: center;
+}
 
+[data-mode='exhibition'] .viewer-section:is(:fullscreen, .is-expanded) > .instrument-panel {
+  overflow-y: auto;
+}
+
+@container instrument-controls (min-width: 600px) {
   [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-panel {
-    width: min(100%, 880px);
+    width: min(100%, 720px);
     max-width: none;
   }
 
   [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-face {
-    aspect-ratio: 2.25;
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(var(--lcd-width), 280px) repeat(2, 76px);
+    grid-template-rows: 68px minmax(76px, auto);
+    grid-template-areas:
+      'lcd . recall'
+      'hints tune preset';
     align-items: center;
-    gap: clamp(12px, 2.5cqw, 22px);
-    padding: clamp(24px, 4cqw, 34px);
-    border: 1px solid #a8adaa;
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-face::before {
-    background: linear-gradient(135deg, #f0f0ec, #dedfdb);
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .panel-screw {
-    width: clamp(10px, 1.8cqw, 15px);
-  }
-
-  html[data-theme='dark'] .viewer-section > .instrument-panel .exhibition-face {
-    border-color: #565c64;
-  }
-
-  html[data-theme='dark'] .viewer-section > .instrument-panel .exhibition-face::before {
-    background: linear-gradient(135deg, #343534, #2e2e2d);
-    filter: none;
+    justify-content: center;
+    gap: 16px 24px;
+    padding: 28px 32px;
   }
 
   [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-lcd {
-    position: relative;
-    inset: auto;
-    grid-area: 1 / 1 / 2 / 3;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 3.7;
-    font-size: clamp(16px, 4.8cqw, 36px);
-    box-shadow:
-      inset 0 2px 5px #0007,
-      0 0 0 7px #3b4244,
-      0 1px 1px 8px #858b8b,
-      0 3px 4px 8px #0003;
-  }
-
-  html[data-theme='dark'] .viewer-section > .instrument-panel .exhibition-lcd {
-    box-shadow:
-      inset 0 2px 5px #0007,
-      0 0 0 7px #151716,
-      0 1px 1px 8px #262927,
-      0 3px 4px 8px #0005;
+    justify-self: start;
   }
 
   [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-hints {
-    position: relative;
-    inset: auto;
-    grid-area: 2 / 1;
-    width: 100%;
-    font-size: clamp(12px, 1.8cqw, 16px);
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-hardware {
-    position: relative;
-    inset: auto;
-    transform: none;
-    justify-self: center;
-    width: clamp(60px, 13cqw, 100px);
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-hardware--recall {
-    grid-area: 1 / 3;
-    width: clamp(48px, 10cqw, 80px);
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-hardware--tune {
-    grid-area: 2 / 2;
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-hardware--preset {
-    grid-area: 2 / 3;
-  }
-
-  [data-mode='exhibition'] .viewer-section > .instrument-panel .exhibition-recall {
-    border: 2px solid #777e7f;
-    background: radial-gradient(circle at 40% 30%, #969e9d, #586160 75%);
-    box-shadow:
-      0 2px 4px #0003,
-      inset 0 1px 1px #fff5;
-  }
-
-  html[data-theme='dark'] .viewer-section > .instrument-panel .exhibition-recall {
-    border-color: #626a75;
-    background: radial-gradient(circle at 40% 30%, #444b55, #20252c 70%);
-    box-shadow:
-      0 2px 4px #0007,
-      inset 0 1px 1px #a9b3c233;
+    align-self: center;
   }
 
   [data-mode='exhibition'] .viewer-section:is(:fullscreen, .is-expanded) > .instrument-panel {
@@ -364,28 +198,9 @@ html[data-theme='dark'] .parameter-drawer .exhibition-recall {
     max-height: min(40dvh, 380px);
     padding: 14px 18px;
   }
-
-  [data-mode='exhibition']
-    .viewer-section:is(:fullscreen, .is-expanded)
-    > .instrument-panel
-    .exhibition-instrument {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  [data-mode='exhibition']
-    .viewer-section:is(:fullscreen, .is-expanded)
-    > .instrument-panel
-    .exhibition-panel {
-    width: min(100%, 792px, calc(90dvh - 63px));
-  }
 }
 
 @media (min-width: 901px) {
-  [data-mode='exhibition'] .exhibition-instrument {
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.55fr);
-    gap: clamp(24px, 4vw, 56px);
-  }
-
   [data-mode='exhibition'] .exhibition-panel {
     max-width: 620px;
     justify-self: center;
@@ -393,11 +208,6 @@ html[data-theme='dark'] .parameter-drawer .exhibition-recall {
 
   [data-mode='exhibition'] .exhibition-aux {
     width: 100%;
-  }
-
-  [data-mode='exhibition'] .viewer-section:fullscreen .exhibition-instrument,
-  [data-mode='exhibition'] .viewer-section.is-expanded .exhibition-instrument {
-    grid-template-columns: minmax(0, 370px) minmax(240px, 1fr);
   }
 }
 
@@ -416,10 +226,6 @@ html[data-theme='dark'] .parameter-drawer .exhibition-recall {
 
   [data-mode='exhibition'] .parameter-drawer .instrument-panel {
     padding: 10px;
-  }
-
-  [data-mode='exhibition'] .parameter-drawer .exhibition-lcd {
-    font-size: 10px;
   }
 
   [data-mode='exhibition'] .parameter-drawer .audio-controls {

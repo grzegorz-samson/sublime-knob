@@ -5,22 +5,31 @@ const errorPanel = document.querySelector('#model-error');
 const errorMessage = document.querySelector('#error-message');
 const status = document.querySelector('#status-indicator');
 const statusText = document.querySelector('#status-text');
+const errorTitle = errorPanel.querySelector('strong');
 const descriptions = {
   graphics: [
-    '3D is unavailable in this browser. Open the exhibition in a browser with WebGL enabled.',
-    'Widok 3D jest niedostępny w tej przeglądarce. Otwórz wystawę w przeglądarce z włączoną obsługą WebGL.',
+    'The 3D view is unavailable. You can still play using the controls below.',
+    'Widok 3D jest niedostępny. Nadal możesz grać, używając kontrolek poniżej.',
   ],
   startup: [
-    'Could not start the 3D view. Reload the page to try again.',
-    'Nie udało się uruchomić widoku 3D. Odśwież stronę, aby spróbować ponownie.',
+    'The 3D view could not start. You can still play using the controls below.',
+    'Nie udało się uruchomić widoku 3D. Nadal możesz grać, używając kontrolek poniżej.',
   ],
   model: [
-    'Could not load the instrument. Check your connection and reload the page.',
-    'Nie udało się wczytać instrumentu. Sprawdź połączenie i odśwież stronę.',
+    'The 3D model could not be loaded. You can still play using the controls below.',
+    'Nie udało się wczytać modelu 3D. Nadal możesz grać, używając kontrolek poniżej.',
   ],
   timeout: [
-    'The 3D model is taking too long to load. Try reloading the page.',
-    'Wczytywanie modelu 3D trwa zbyt długo. Spróbuj odświeżyć stronę.',
+    'The 3D model did not load in time. You can still play using the controls below.',
+    'Model 3D nie został wczytany na czas. Nadal możesz grać, używając kontrolek poniżej.',
+  ],
+  context: [
+    'The 3D view was interrupted. You can still play using the controls below.',
+    'Widok 3D został przerwany. Nadal możesz grać, używając kontrolek poniżej.',
+  ],
+  core: [
+    'Could not start the instrument. Reload the page to try again.',
+    'Nie udało się uruchomić instrumentu. Odśwież stronę, aby spróbować ponownie.',
   ],
 };
 
@@ -39,6 +48,11 @@ function translate() {
   const language = polish ? 1 : 0;
   statusText.textContent = labels[state][language];
   if (state === 'error') {
+    errorTitle.textContent = (
+      reason === 'core'
+        ? ['Could not start the instrument', 'Nie udało się uruchomić instrumentu']
+        : ['3D view unavailable', 'Widok 3D niedostępny']
+    )[language];
     errorMessage.textContent = descriptions[reason][language];
   }
 }
@@ -61,9 +75,19 @@ function fail(cause, error) {
 }
 
 export const loadFeedback = {
-  start() {
+  start({ onTimeout } = {}) {
+    clearTimeout(delay);
+    clearTimeout(deadline);
+    state = 'loading';
+    reason = undefined;
+    loading.classList.add('is-hidden');
+    errorPanel.hidden = true;
+    translate();
     delay = setTimeout(() => loading.classList.remove('is-hidden'), LOADING_DELAY_MS);
-    deadline = setTimeout(() => fail('timeout'), LOAD_TIMEOUT_MS);
+    deadline = setTimeout(() => {
+      if (onTimeout) onTimeout();
+      else fail('timeout');
+    }, LOAD_TIMEOUT_MS);
   },
   ready() {
     finish('ready');

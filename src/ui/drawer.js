@@ -8,6 +8,7 @@ export class ExhibitionDrawer {
     this.home = document.createComment('Instrument panel');
     this.panel.before(this.home);
     this.open = false;
+    this.inline = false;
     this.mobileQuery = matchMedia('(max-width: 760px), (max-width: 1100px) and (pointer: coarse)');
     this.mobileQuery.addEventListener('change', () => this.setOpen(!this.mobileQuery.matches));
     this.handle.addEventListener('click', () => this.setOpen(!this.open));
@@ -22,7 +23,7 @@ export class ExhibitionDrawer {
   }
 
   setOpen(open) {
-    open = open && !this.mobileQuery.matches;
+    open = open && !this.mobileQuery.matches && !this.inline;
     this.open = open;
     if (open) this.drawer.append(this.panel);
     else this.home.after(this.panel);
@@ -31,6 +32,13 @@ export class ExhibitionDrawer {
     this.handle.setAttribute('aria-expanded', String(open));
     this.handle.firstElementChild.textContent = open ? '›' : '‹';
     this.translate();
+  }
+
+  setInline(inline) {
+    this.inline = inline;
+    this.handle.hidden = inline;
+    this.handle.disabled = inline;
+    this.setOpen(inline ? false : !this.mobileQuery.matches);
   }
 
   translate() {

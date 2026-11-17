@@ -5,7 +5,7 @@ const rad = THREE.MathUtils.degToRad;
 const deg = THREE.MathUtils.radToDeg;
 const CONTROL_ROLES = ['fine', 'preset', 'save'];
 
-/** Articulation and picking for the existing GLB. No labels are drawn over the stage. */
+/** Instrument articulation and pointer picking. */
 export class InstrumentScene {
   constructor({ model, camera, canvas, orbit, onAction, onDirty, onInteraction }) {
     Object.assign(this, { model, camera, canvas, orbit, onAction, onDirty, onInteraction });
@@ -44,7 +44,7 @@ export class InstrumentScene {
     hub.parent.add(this.main);
     this.main.position.copy(this.main.parent.worldToLocal(this.center.clone()));
     this.main.updateMatrixWorld(true);
-    // Determine the photographed pointer's initial angle from its actual longest vertex.
+    // Infer the pointer's initial angle from its longest vertex.
     let longest = new THREE.Vector3(),
       length = 0;
     const positions = pointer.geometry.attributes.position;
@@ -351,8 +351,7 @@ export class InstrumentScene {
         const q = this.poseQuaternion
           .copy(base.quaternion)
           .multiply(this.turnQuaternion.setFromAxisAngle(this.poseAxis, -this.encoderTurns[role]));
-        // GLB quaternions are float-quantized: dot(q,q) can be below 1 even
-        // when the pose is identical. Compare deterministic components instead.
+        // Component comparison avoids floating-point error in quaternion dot products.
         if (!part.quaternion.equals(q)) {
           part.quaternion.copy(q);
           animated = true;
@@ -365,7 +364,7 @@ export class InstrumentScene {
     if (angleChanged || lcdChanged || animated) this.onDirty(angleChanged || animated);
   }
 
-  /** Read-only screen coordinates for browser checks and accessible navigation diagnostics. */
+  /** Project control positions into screen coordinates. */
   diagnostics() {
     const b = this.canvas.getBoundingClientRect();
     const project = (p) => {

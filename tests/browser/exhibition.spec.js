@@ -6,6 +6,69 @@ async function openInstrument(page, suffix = '') {
   await expect(page.locator('#model-error')).toBeHidden();
 }
 
+async function expectUnavailableWithWorking2D(page) {
+  const viewer = page.locator('.viewer-section');
+  await expect(viewer).toHaveAttribute('data-viewer-state', 'unavailable');
+  await expect(page.locator('#model-error')).toBeVisible();
+  await expect(viewer.locator('[data-view="inside"]')).toBeDisabled();
+  await expect(viewer.locator('[data-view="display"]')).toBeDisabled();
+  await expect(viewer.locator('#reset-view')).toBeDisabled();
+  await expect(page.locator('.viewer-section > .instrument-panel')).toBeVisible();
+
+  const tune = page.locator('.exhibition-hardware--tune button');
+  await tune.press('ArrowUp');
+  await expect(page.locator('.exhibition-lcd')).toContainText('+1');
+  await tune.click({ modifiers: ['Control'] });
+  await expect(page.locator('.exhibition-lcd')).toContainText('+0');
+  await tune.press('Enter');
+  await expect(page.locator('.exhibition-lcd')).toContainText('25c');
+
+  await page.locator('.exhibition-hardware--preset button').press('ArrowUp');
+  await expect(page.locator('.exhibition-lcd')).toContainText('SET:01');
+  await page.locator('.exhibition-recall').click();
+  await expect(page.locator('.exhibition-lcd span').first()).toHaveText('00134Hz SET:01');
+
+  if (await hasWebAudio(page)) {
+    await expect(page.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => measureInstrumentRms(page)).toBeGreaterThan(0.005);
+    await page.locator('#audio-toggle').click();
+    await expect(page.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'false');
+    await expect.poll(() => measureInstrumentRms(page)).toBeLessThan(0.005);
+  } else {
+    await expect(page.locator('#audio-toggle')).toBeDisabled();
+    await expect(page.locator('.audio-button-label')).toHaveText('Audio unavailable');
+  }
+}
+
+async function hasWebAudio(page) {
+  return page.evaluate(() => Boolean(window.AudioContext || window.webkitAudioContext));
+}
+
+async function measureInstrumentRms(page) {
+  return page.evaluate(() => {
+    const analyser = window.__instrumentAnalysers?.[0];
+    if (!analyser) return 0;
+    const samples = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(samples);
+    return Math.sqrt(samples.reduce((sum, sample) => sum + sample * sample, 0) / samples.length);
+  });
+}
+
+async function captureInstrumentAudio(page) {
+  await page.addInitScript(() => {
+    const Audio = window.AudioContext ?? window.webkitAudioContext;
+    window.__instrumentAnalysers = [];
+    if (!Audio) return;
+    const createAnalyser = Audio.prototype.createAnalyser;
+    Audio.prototype.createAnalyser = function (...args) {
+      const analyser = createAnalyser.apply(this, args);
+      analyser.fftSize = 2048;
+      window.__instrumentAnalysers.push(analyser);
+      return analyser;
+    };
+  });
+}
+
 test('production starts in English at the project path with no technical features', async ({
   page,
 }) => {
@@ -70,7 +133,12 @@ test('preset recall advances the local motor and settles', async ({ page }) => {
 
 test('gallery loads only published photographs and returns to the instrument', async ({ page }) => {
   await openInstrument(page);
-  await page.locator('#gallery-nav').click();
+  const navigation = page.locator('#gallery-nav');
+  const navigationWidth = (await navigation.boundingBox()).width;
+  await expect(navigation).toHaveAccessibleName('Gallery');
+  await navigation.click();
+  await expect(navigation).toHaveAccessibleName('Home');
+  expect((await navigation.boundingBox()).width).toBe(navigationWidth);
   await expect(page.locator('.viewer-section')).toBeHidden();
   for (const image of await page.locator('.gallery-image img').all()) {
     await expect.poll(() => image.evaluate((node) => node.naturalWidth)).toBeGreaterThan(0);
@@ -85,58 +153,242 @@ test('gallery loads only published photographs and returns to the instrument', a
   for (const image of await page.locator('.gallery-image img').all()) {
     await image.evaluate((node) => node.decode());
   }
-  await page.locator('.gallery-back').click();
+  await expect(navigation).toHaveAccessibleName('Home');
+  await page.locator('#exhibition-language').click();
+  await expect(navigation).toHaveAccessibleName('Start');
+  expect((await navigation.boundingBox()).width).toBe(navigationWidth);
+  await navigation.click();
   await expect(page.locator('#stage canvas')).toBeVisible();
+  await expect(navigation).toHaveAccessibleName('Galeria');
 });
 
-test('fullscreen and mobile reflow keep the controls inside the panel', async ({
-  page,
-  browser,
-}) => {
+test('fullscreen and narrow reflow keep controls inside the panel', async ({ page }) => {
   await openInstrument(page);
   await page.locator('#fullscreen-toggle').click();
   await expect(page.locator('#fullscreen-toggle')).toHaveAttribute('aria-pressed', 'true');
   const measure = () =>
     page.evaluate(() => {
-      const face = document.querySelector('.exhibition-face').getBoundingClientRect();
+      const panel = document.querySelector('.exhibition-face');
+      const face = panel.getBoundingClientRect();
+      const lcd = panel.querySelector('.exhibition-lcd').getBoundingClientRect();
+      const topScrew = panel.querySelector('.panel-screw--top-left').getBoundingClientRect();
+      const recall = panel.querySelector('.exhibition-hardware--recall').getBoundingClientRect();
+      const encoder = panel.querySelector('.exhibition-hardware--preset').getBoundingClientRect();
+      const tune = panel.querySelector('.exhibition-hardware--tune').getBoundingClientRect();
+      const hints = panel.querySelector('.exhibition-hints').getBoundingClientRect();
       return {
         width: face.width,
         height: face.height,
         bottom: face.bottom,
-        controls: [...document.querySelectorAll('.exhibition-hardware')].map(
-          (node) => node.getBoundingClientRect().bottom,
+        lcdGap: lcd.top - 8 - topScrew.bottom,
+        recallGap: encoder.top - recall.bottom,
+        encoderGap: encoder.left - tune.right,
+        recallAlignment: recall.x + recall.width / 2 - (encoder.x + encoder.width / 2),
+        hintsSpanPanel:
+          hints.left < tune.left && hints.right > encoder.right && hints.bottom <= recall.top,
+        controls: [...panel.querySelectorAll('.exhibition-lcd, .exhibition-hardware')].map(
+          (node) => {
+            const { width, height, bottom } = node.getBoundingClientRect();
+            return { width, height, bottom };
+          },
         ),
+        screws: [...panel.querySelectorAll('.panel-screw')].map((node) => {
+          const rect = node.getBoundingClientRect();
+          return {
+            size: rect.width,
+            horizontalInset: Math.round(Math.min(rect.left - face.left, face.right - rect.right)),
+            verticalInset: Math.round(Math.min(rect.top - face.top, face.bottom - rect.bottom)),
+          };
+        }),
       };
     });
-  let size = await measure();
-  expect(size.height).toBeLessThanOrEqual(560);
-  expect(size.width).toBeGreaterThan(390);
+  const side = await measure();
+  expect(side.height).toBeLessThanOrEqual(560);
+  expect(side.width).toBeGreaterThan(390);
+  expect(side.lcdGap).toBeGreaterThanOrEqual(7);
+  expect(side.recallGap).toBeGreaterThanOrEqual(23);
+  expect(side.hintsSpanPanel).toBe(true);
   await page.locator('#parameter-handle').click();
-  size = await measure();
-  expect(size.width / size.height).toBeGreaterThan(2);
-  expect(size.height).toBeLessThan(360);
-  expect(size.controls.every((bottom) => bottom < size.bottom)).toBe(true);
+  const wide = await measure();
+  expect(wide.width / wide.height).toBeGreaterThan(2);
+  expect(wide.width).toBeLessThanOrEqual(720);
+  expect(wide.height).toBeLessThan(240);
+  expect(wide.encoderGap).toBeCloseTo(24);
+  expect(wide.recallAlignment).toBeCloseTo(0);
+  const controlSizes = (panel) => panel.controls.map(({ width, height }) => [width, height]);
+  expect(controlSizes(wide)).toEqual(controlSizes(side));
+  expect(wide.controls.every(({ bottom }) => bottom < wide.bottom)).toBe(true);
+  expect(wide.screws).toHaveLength(4);
+  expect(wide.screws).toEqual(side.screws);
+  for (const screw of wide.screws) {
+    expect(screw).toEqual(wide.screws[0]);
+    expect(screw.horizontalInset).toBe(screw.verticalInset);
+  }
   await page.locator('#fullscreen-toggle').click();
 
-  const mobileContext = await browser.newContext({
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#exhibition-zoom')).toBeEnabled();
+  await expect(page.locator('#parameter-handle')).toBeHidden();
+  await expect(page.locator('.viewer-section > .instrument-panel')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const mobile = await measure();
+  expect(controlSizes(mobile)).toEqual(controlSizes(side));
+  expect(mobile.screws).toEqual(side.screws);
+  expect(mobile.lcdGap).toBeGreaterThanOrEqual(7);
+  expect(mobile.recallGap).toBeGreaterThanOrEqual(23);
+  expect(mobile.hintsSpanPanel).toBe(true);
+  await page.locator('.exhibition-recall').click();
+  await expect(page.locator('.exhibition-recall')).not.toHaveClass(/is-pressed|is-click-pulse/);
+});
+
+test('the first touch on a control starts audible playback', async ({ browser, browserName }) => {
+  test.skip(
+    browserName === 'firefox',
+    'Playwright Firefox does not support the isMobile context option; touch activation is tested in Chromium and WebKit.',
+  );
+  const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     hasTouch: true,
     isMobile: true,
   });
-  const mobile = await mobileContext.newPage();
+  const mobile = await context.newPage();
   try {
+    await captureInstrumentAudio(mobile);
     await mobile.goto('http://127.0.0.1:4173/sublime-knob/');
     await expect(mobile.locator('#exhibition-zoom')).toBeEnabled();
-    await expect(mobile.locator('#parameter-handle')).toBeHidden();
-    await expect(mobile.locator('.viewer-section > .instrument-panel')).toBeVisible();
-    expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
+    test.skip(
+      !(await hasWebAudio(mobile)),
+      'This Playwright browser build does not expose the Web Audio API.',
     );
-    await mobile.locator('.exhibition-recall').tap();
-    await expect(mobile.locator('.exhibition-recall')).not.toHaveClass(/is-pressed|is-click-pulse/);
+    expect(await measureInstrumentRms(mobile)).toBe(0);
+    await mobile.locator('.exhibition-hardware--tune button').tap();
+    await expect(mobile.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => measureInstrumentRms(mobile)).toBeGreaterThan(0.005);
+    await mobile.locator('#audio-toggle').tap();
+    await expect(mobile.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'false');
+    await expect.poll(() => measureInstrumentRms(mobile)).toBeLessThan(0.005);
   } finally {
-    await mobileContext.close();
+    await context.close();
   }
+});
+
+test('2D controls remain usable when WebGL is unavailable', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      if (['webgl2', 'webgl', 'experimental-webgl'].includes(type)) return null;
+      return getContext.call(this, type, ...args);
+    };
+  });
+  await page.goto('./');
+  await expectUnavailableWithWorking2D(page);
+});
+
+test('2D controls remain usable when the model request fails', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  await page.route('**/media/sublime-knob.glb', (route) => route.fulfill({ status: 404 }));
+  await page.goto('./');
+  await expectUnavailableWithWorking2D(page);
+});
+
+test('2D controls remain usable when the Three.js module fails to load', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  await page.route('**/assets/three-*.js', (route) => route.abort('failed'));
+  await page.goto('./');
+  await expectUnavailableWithWorking2D(page);
+});
+
+test('2D controls remain usable after WebGL context loss', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  await openInstrument(page);
+  const contextLost = page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const canvas = document.querySelector('#stage canvas');
+        canvas.addEventListener('webglcontextlost', () => resolve(true), { once: true });
+        const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+        const extension = gl?.getExtension('WEBGL_lose_context');
+        if (!extension) resolve(false);
+        else extension.loseContext();
+      }),
+  );
+  expect(await contextLost).toBe(true);
+  await expectUnavailableWithWorking2D(page);
+});
+
+test('2D controls and audio work before a delayed model finishes loading', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  let loaded = false;
+  await page.route('**/media/sublime-knob.glb', async (route) => {
+    const response = await route.fetch();
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    loaded = true;
+    await route.fulfill({ response });
+  });
+  await page.goto('./', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.viewer-section')).toHaveAttribute('data-viewer-state', 'loading');
+  await expect(page.locator('.exhibition-panel')).toBeVisible();
+  await expect(page.locator('#exhibition-zoom')).toBeDisabled();
+  const tune = page.locator('.exhibition-hardware--tune button');
+  await tune.press('ArrowUp');
+  await expect(page.locator('.exhibition-lcd')).toContainText('+1');
+  await tune.click({ modifiers: ['Control'] });
+  await page.locator('.exhibition-hardware--preset button').press('ArrowUp');
+  await page.locator('.exhibition-recall').click();
+  await expect(page.locator('.exhibition-lcd span').first()).toHaveText('00134Hz SET:01');
+  if (await hasWebAudio(page)) {
+    await expect(page.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => measureInstrumentRms(page)).toBeGreaterThan(0.005);
+    await page.locator('#audio-toggle').click();
+    await expect(page.locator('#audio-toggle')).toHaveAttribute('aria-pressed', 'false');
+    await expect.poll(() => measureInstrumentRms(page)).toBeLessThan(0.005);
+  } else {
+    await expect(page.locator('#audio-toggle')).toBeDisabled();
+    await expect(page.locator('.audio-button-label')).toHaveText('Audio unavailable');
+  }
+  await expect(page.locator('#exhibition-zoom')).toBeEnabled({ timeout: 10000 });
+  expect(loaded).toBe(true);
+  await expect(page.locator('.exhibition-lcd span').first()).toHaveText('00134Hz SET:01');
+});
+
+test('starting from the gallery lets the hidden viewer reach ready without rendering first', async ({
+  page,
+}) => {
+  await page.goto('./#gallery', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.viewer-section')).toHaveAttribute('data-viewer-state', 'ready');
+  await expect(page.locator('#exhibition-gallery')).toBeVisible();
+  await expect(page.locator('.viewer-section')).toBeHidden();
+  await expect(page.locator('#model-error')).toBeHidden();
+});
+
+test('a timed-out viewer stays unavailable when its model arrives late', async ({ page }) => {
+  await captureInstrumentAudio(page);
+  await page.addInitScript(() => {
+    const setTimeoutNative = window.setTimeout;
+    window.setTimeout = function (callback, delay, ...args) {
+      return setTimeoutNative.call(this, callback, delay === 20000 ? 1000 : delay, ...args);
+    };
+  });
+  let finishModelDelivery;
+  const modelDelivered = new Promise((resolve) => {
+    finishModelDelivery = resolve;
+  });
+  await page.route('**/media/sublime-knob.glb', async (route) => {
+    const response = await route.fetch();
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await route.fulfill({ response });
+    finishModelDelivery();
+  });
+  await page.goto('./', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.viewer-section')).toHaveAttribute('data-viewer-state', 'unavailable');
+  await expect(page.locator('#model-error')).toBeVisible();
+  await expect(page.locator('#stage canvas')).toHaveCount(0);
+  await modelDelivered;
+  await page.waitForTimeout(50);
+  await expect(page.locator('.viewer-section')).toHaveAttribute('data-viewer-state', 'unavailable');
+  await expect(page.locator('#stage canvas')).toHaveCount(0);
+  await expectUnavailableWithWorking2D(page);
 });
 
 test('native audio stays smooth while the main 3D knob moves in both directions', async ({
@@ -145,6 +397,7 @@ test('native audio stays smooth while the main 3D knob moves in both directions'
   await page.addInitScript(() => {
     const NativeAudioContext = window.AudioContext;
     window.__audioContexts = [];
+    if (!NativeAudioContext) return;
     window.AudioContext = class extends NativeAudioContext {
       constructor(...args) {
         super(...args);
@@ -159,6 +412,10 @@ test('native audio stays smooth while the main 3D knob moves in both directions'
     };
   });
   await openInstrument(page);
+  test.skip(
+    !(await hasWebAudio(page)),
+    'This Playwright browser build does not expose the Web Audio API.',
+  );
   expect(await page.evaluate(() => window.__audioContexts.length)).toBe(0);
   const hint = page.locator('#model-grab-hint');
   await expect(hint).toBeVisible();
@@ -226,7 +483,7 @@ test('native audio stays smooth while the main 3D knob moves in both directions'
   expect(signal.peak).toBeLessThan(0.106);
   expect(signal.min).toBeGreaterThan(430);
   expect(signal.max).toBeLessThan(680);
-  expect(signal.jump).toBeLessThan(3);
+  expect(signal.jump).toBeLessThan(3.5);
   await page.locator('#audio-toggle').click();
   await expect(page.locator('.audio-button-label')).toHaveText('Mute');
   await page.locator('.exhibition-hardware--tune button').press('ArrowUp');

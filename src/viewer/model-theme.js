@@ -59,8 +59,7 @@ export class ModelTheme {
       }
     });
 
-    // The interior floor catches the studio environment at grazing angles.
-    // Isolate its finish so reducing that reflection leaves the exterior wood intact.
+    // Interior wood uses an independent matte material.
     if (this.bottomOriginalMaterial) {
       this.bottomDarkMaterial = this.bottomOriginalMaterial.clone();
       this.bottomDarkMaterial.color.set('#241a13');
