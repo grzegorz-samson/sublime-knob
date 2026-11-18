@@ -162,10 +162,66 @@ test('gallery loads only published photographs and returns to the instrument', a
   await expect(navigation).toHaveAccessibleName('Galeria');
 });
 
-test('fullscreen and narrow reflow keep controls inside the panel', async ({ page }) => {
+test('fullscreen hides the 2D panel and restores its layout on exit', async ({ page }) => {
   await openInstrument(page);
-  await page.locator('#fullscreen-toggle').click();
-  await expect(page.locator('#fullscreen-toggle')).toHaveAttribute('aria-pressed', 'true');
+  const fullscreen = page.locator('#fullscreen-toggle');
+  const panelFace = page.locator('.exhibition-face');
+  const handle = page.locator('#parameter-handle');
+  const measureAudio = () =>
+    page.evaluate(() => {
+      const audio = document.querySelector('#exhibition-aux');
+      const slider = document.querySelector('#audio-volume');
+      return {
+        width: audio.getBoundingClientRect().width,
+        icon: audio.querySelector('.audio-symbol').getBoundingClientRect().width,
+        text: getComputedStyle(document.querySelector('#audio-toggle')).fontSize,
+        slider: slider.getBoundingClientRect().width,
+        thumb: getComputedStyle(slider).getPropertyValue('--range-thumb-size').trim(),
+      };
+    });
+  const standardAudio = await measureAudio();
+  const expectFullStage = async ({ inlineAudio }) => {
+    await expect(fullscreen).toHaveAttribute('aria-pressed', 'true');
+    await expect(panelFace).toBeHidden();
+    await expect(handle).toBeHidden();
+    await expect(page.locator('#stage canvas')).toBeVisible();
+    await expect(
+      page.locator(
+        inlineAudio ? '.viewer-toolbar > #exhibition-aux' : '.viewer-section > #exhibition-aux',
+      ),
+    ).toBeVisible();
+    expect(await measureAudio()).toEqual(standardAudio);
+    if (inlineAudio) {
+      const aligned = await page.evaluate(() => {
+        const centerY = (selector) => {
+          const { top, height } = document.querySelector(selector).getBoundingClientRect();
+          return top + height / 2;
+        };
+        const centers = [
+          centerY('.view-tab'),
+          centerY('#audio-toggle'),
+          centerY('#audio-volume'),
+          centerY('#fullscreen-toggle'),
+        ];
+        return Math.max(...centers) - Math.min(...centers) < 1;
+      });
+      expect(aligned).toBe(true);
+    }
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const viewer = document.querySelector('.viewer-section').getBoundingClientRect();
+          const toolbar = document.querySelector('.viewer-toolbar').getBoundingClientRect();
+          const stage = document.querySelector('#stage').getBoundingClientRect();
+          return (
+            Math.abs(stage.width - viewer.width) < 1 &&
+            Math.abs(stage.top - toolbar.bottom) < 1 &&
+            Math.abs(stage.bottom - viewer.bottom) < 1
+          );
+        }),
+      )
+      .toBe(true);
+  };
   const measure = () =>
     page.evaluate(() => {
       const panel = document.querySelector('.exhibition-face');
@@ -204,11 +260,18 @@ test('fullscreen and narrow reflow keep controls inside the panel', async ({ pag
     });
   const side = await measure();
   expect(side.height).toBeLessThanOrEqual(560);
-  expect(side.width).toBeGreaterThan(390);
+  expect(side.width).toBeGreaterThan(260);
   expect(side.lcdGap).toBeGreaterThanOrEqual(7);
   expect(side.recallGap).toBeGreaterThanOrEqual(23);
   expect(side.hintsSpanPanel).toBe(true);
-  await page.locator('#parameter-handle').click();
+
+  await fullscreen.click();
+  await expectFullStage({ inlineAudio: true });
+  await fullscreen.click();
+  await expect(fullscreen).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#parameter-drawer .exhibition-face')).toBeVisible();
+
+  await handle.click();
   const wide = await measure();
   expect(wide.width / wide.height).toBeGreaterThan(2);
   expect(wide.width).toBeLessThanOrEqual(720);
@@ -224,9 +287,18 @@ test('fullscreen and narrow reflow keep controls inside the panel', async ({ pag
     expect(screw).toEqual(wide.screws[0]);
     expect(screw.horizontalInset).toBe(screw.verticalInset);
   }
-  await page.locator('#fullscreen-toggle').click();
-
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'fullscreenEnabled', { value: false });
+  });
+  await fullscreen.click();
+  await expect(page.locator('.viewer-section')).toHaveClass(/is-expanded/);
+  await expectFullStage({ inlineAudio: true });
   await page.setViewportSize({ width: 390, height: 844 });
+  await expectFullStage({ inlineAudio: false });
+  await page.keyboard.press('Escape');
+  await expect(fullscreen).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('.viewer-section > .instrument-panel')).toBeVisible();
+
   await expect(page.locator('#exhibition-zoom')).toBeEnabled();
   await expect(page.locator('#parameter-handle')).toBeHidden();
   await expect(page.locator('.viewer-section > .instrument-panel')).toBeVisible();
@@ -237,6 +309,10 @@ test('fullscreen and narrow reflow keep controls inside the panel', async ({ pag
   expect(mobile.lcdGap).toBeGreaterThanOrEqual(7);
   expect(mobile.recallGap).toBeGreaterThanOrEqual(23);
   expect(mobile.hintsSpanPanel).toBe(true);
+  await fullscreen.click();
+  await expectFullStage({ inlineAudio: false });
+  await fullscreen.click();
+  await expect(panelFace).toBeVisible();
   await page.locator('.exhibition-recall').click();
   await expect(page.locator('.exhibition-recall')).not.toHaveClass(/is-pressed|is-click-pulse/);
 });

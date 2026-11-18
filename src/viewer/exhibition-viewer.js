@@ -6,6 +6,8 @@ import { InstrumentScene } from '../instrument/scene.js';
 import { CoverDrag } from './cover-drag.js';
 import { ModelTheme } from './model-theme.js';
 
+const RESET_VIEW_DURATION = 0.95;
+
 function disposeGraph(root) {
   const geometries = new Set(),
     materials = new Set(),
@@ -190,6 +192,7 @@ function buildViewer(
   let coverOpen = false;
   let transition = null;
   let cameraTransition = false;
+  let resetElapsed = null;
   let loaded = false;
   let meshCount = 0;
   let renderDirty = true;
@@ -282,7 +285,7 @@ function buildViewer(
     };
   }
 
-  function focusView(name) {
+  function focusView(name, smoothReset = false) {
     const preset = lookPresets[name];
     if (!preset) return;
     controls.minDistance = orbitMinDistance * viewportDistanceScale;
@@ -294,6 +297,7 @@ function buildViewer(
       .multiplyScalar(viewportDistanceScale)
       .add(cameraGoal.target);
     cameraTransition = true;
+    resetElapsed = smoothReset ? 0 : null;
     if (prefersReducedMotion) {
       camera.position.copy(cameraGoal.position);
       controls.target.copy(cameraGoal.target);
@@ -305,7 +309,14 @@ function buildViewer(
 
   function animateCamera(delta) {
     if (!cameraTransition) return;
-    const amount = prefersReducedMotion ? 1 : 1 - Math.exp(-delta * 4.2);
+    let amount = 1 - Math.exp(-delta * 4.2);
+    if (resetElapsed !== null) {
+      const previous = THREE.MathUtils.smoothstep(resetElapsed, 0, RESET_VIEW_DURATION);
+      resetElapsed += delta;
+      const eased = THREE.MathUtils.smoothstep(resetElapsed, 0, RESET_VIEW_DURATION);
+      amount = (eased - previous) / (1 - previous);
+      renderDirty = true;
+    }
     const currentOrbit = new THREE.Spherical().setFromVector3(
       camera.position.clone().sub(controls.target),
     );
@@ -321,12 +332,15 @@ function buildViewer(
     controls.target.lerp(cameraGoal.target, amount);
     camera.position.setFromSpherical(currentOrbit).add(controls.target);
     if (
-      camera.position.distanceToSquared(cameraGoal.position) < 0.000025 &&
-      controls.target.distanceToSquared(cameraGoal.target) < 0.000025
+      resetElapsed !== null
+        ? resetElapsed >= RESET_VIEW_DURATION
+        : camera.position.distanceToSquared(cameraGoal.position) < 0.000025 &&
+          controls.target.distanceToSquared(cameraGoal.target) < 0.000025
     ) {
       camera.position.copy(cameraGoal.position);
       controls.target.copy(cameraGoal.target);
       cameraTransition = false;
+      resetElapsed = null;
     }
   }
 
@@ -617,6 +631,22 @@ function buildViewer(
     orbitInteracting = false;
     cameraTransition = false;
   }
+
+  function resetView() {
+    // Clear the orbit's pending motion while retaining the current camera pose.
+    const position = camera.position.clone();
+    const target = controls.target.clone();
+    const damping = controls.enableDamping;
+    controls.enableDamping = false;
+    controls.update();
+    camera.position.copy(position);
+    controls.target.copy(target);
+    controls.enableDamping = damping;
+    controls.update();
+
+    setCover(false);
+    focusView('front', true);
+  }
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -693,11 +723,7 @@ function buildViewer(
       if (loaded) safely(() => focusView(name));
     },
     resetView() {
-      if (loaded)
-        safely(() => {
-          setCover(false);
-          focusView('front');
-        });
+      if (loaded) safely(resetView);
     },
     closeCover() {
       if (loaded && coverOpen) safely(() => setCover(false));

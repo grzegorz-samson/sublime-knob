@@ -33,6 +33,7 @@ html[data-theme='dark'] .theme-moon {
 }
 
 html[data-mode='exhibition'] {
+  --audio-control-width: 248px;
   --surface: #f9f5ee;
   --surface-hover: #e9e2d6;
   --stage-fallback: #e8e3d9;
@@ -156,10 +157,12 @@ html[data-mode='exhibition'][data-theme='dark'] {
 }
 
 .exhibition-aux {
+  --audio-hit-size: 32px;
   display: grid;
   gap: 24px;
+  width: min(var(--audio-control-width), 100%);
   min-width: 0;
-  padding: 24px;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -174,6 +177,9 @@ html[data-mode='exhibition'][data-theme='dark'] {
 }
 
 .exhibition-aux .audio-controls {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   justify-content: stretch;
 }
 
@@ -192,13 +198,13 @@ html[data-mode='exhibition'][data-theme='dark'] {
 .exhibition-aux .audio-toggle {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 7px;
   justify-self: stretch;
-  min-height: 38px;
+  min-height: var(--audio-hit-size);
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 25px;
+  font-size: 11px;
   font-weight: 400;
   color: var(--ink);
   -webkit-tap-highlight-color: transparent;
@@ -210,6 +216,8 @@ html[data-mode='exhibition'][data-theme='dark'] {
 .exhibition-aux .audio-symbol {
   display: block;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .exhibition-aux .audio-button-label {
@@ -217,6 +225,9 @@ html[data-mode='exhibition'][data-theme='dark'] {
   width: 6.5ch;
   flex: 0 0 6.5ch;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .audio-slash {
@@ -253,11 +264,13 @@ html[data-mode='exhibition'][data-theme='dark'] {
 
 .exhibition-aux input[type='range'] {
   --range-fill: 50%;
+  --range-track-height: 4px;
+  --range-thumb-size: 13px;
   -webkit-appearance: none;
   appearance: none;
   display: block;
-  height: 22px;
-  margin: 6px 0;
+  height: var(--audio-hit-size);
+  margin: 0;
   background: transparent;
   min-width: 0;
   width: 100%;
@@ -265,7 +278,7 @@ html[data-mode='exhibition'][data-theme='dark'] {
 }
 
 .exhibition-aux input[type='range']::-webkit-slider-runnable-track {
-  height: 5px;
+  height: var(--range-track-height);
   border-radius: 8px;
   background: linear-gradient(
     to right,
@@ -276,9 +289,9 @@ html[data-mode='exhibition'][data-theme='dark'] {
 
 .exhibition-aux input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  margin-top: -6.5px;
+  width: var(--range-thumb-size);
+  height: var(--range-thumb-size);
+  margin-top: calc((var(--range-track-height) - var(--range-thumb-size)) / 2);
   border: 0;
   border-radius: 50%;
   background: var(--accent);
@@ -286,20 +299,20 @@ html[data-mode='exhibition'][data-theme='dark'] {
 }
 
 .exhibition-aux input[type='range']::-moz-range-track {
-  height: 5px;
+  height: var(--range-track-height);
   border-radius: 8px;
   background: var(--line);
 }
 
 .exhibition-aux input[type='range']::-moz-range-progress {
-  height: 5px;
+  height: var(--range-track-height);
   border-radius: 8px;
   background: var(--accent);
 }
 
 .exhibition-aux input[type='range']::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: var(--range-thumb-size);
+  height: var(--range-thumb-size);
   border: 0;
   border-radius: 50%;
   background: var(--accent);
@@ -335,11 +348,6 @@ html[data-mode='exhibition'][data-theme='dark'] {
 
   .exhibition-instrument {
     grid-template-columns: minmax(0, 420px);
-  }
-
-  .exhibition-aux {
-    gap: 18px;
-    padding: 20px;
   }
 
   [data-mode='exhibition'] .footer {
@@ -429,37 +437,6 @@ html[data-mode='exhibition'][data-theme='dark'] {
     gap: 14px;
   }
 
-  [data-mode='exhibition'] .exhibition-aux {
-    padding: 12px 14px;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux .audio-controls {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 16px;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux .audio-toggle {
-    min-height: 44px;
-    gap: 8px;
-    font-size: 18px;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux .audio-symbol {
-    width: 24px;
-    height: 24px;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux input[type='range'] {
-    height: 44px;
-    margin: 0;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux .volume-control {
-    gap: 0 8px;
-    font-size: 12px;
-  }
-
   [data-mode='exhibition'] .viewer-section:fullscreen .instrument-panel,
   [data-mode='exhibition'] .viewer-section.is-expanded .instrument-panel {
     max-height: 55dvh;
@@ -495,18 +472,13 @@ html[data-mode='exhibition'][data-theme='dark'] {
     justify-content: center;
     padding: 0;
   }
-
-  [data-mode='exhibition'] .exhibition-aux .audio-toggle {
-    font-size: 15px;
-    gap: 5px;
-  }
-
-  [data-mode='exhibition'] .exhibition-aux .audio-controls {
-    gap: 10px;
-  }
 }
 
 @media (pointer: coarse) {
+  .exhibition-aux {
+    --audio-hit-size: 44px;
+  }
+
   [data-mode='exhibition'] .exhibition-settings button,
   [data-mode='exhibition'] .gallery-nav,
   [data-mode='exhibition'] .view-tab,
@@ -560,39 +532,9 @@ html[data-mode='exhibition'][data-theme='dark'] {
     gap: 10px;
   }
 
-  [data-mode='exhibition'] .viewer-section:fullscreen .exhibition-aux,
-  [data-mode='exhibition'] .viewer-section.is-expanded .exhibition-aux {
-    padding: 6px 10px;
-  }
-
   [data-mode='exhibition'] .viewer-section:fullscreen .exhibition-panel,
   [data-mode='exhibition'] .viewer-section.is-expanded .exhibition-panel {
     width: min(100%, calc(100dvh - 160px));
     justify-self: center;
-  }
-
-  [data-mode='exhibition'] .viewer-section:fullscreen .audio-controls,
-  [data-mode='exhibition'] .viewer-section.is-expanded .audio-controls {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 10px;
-  }
-
-  [data-mode='exhibition'] .viewer-section:fullscreen .audio-toggle,
-  [data-mode='exhibition'] .viewer-section.is-expanded .audio-toggle {
-    font-size: 16px;
-    min-height: 44px;
-    gap: 5px;
-  }
-
-  [data-mode='exhibition'] .viewer-section:fullscreen .volume-control,
-  [data-mode='exhibition'] .viewer-section.is-expanded .volume-control {
-    font-size: 11px;
-    gap: 0 4px;
-  }
-
-  [data-mode='exhibition'] .viewer-section:fullscreen .audio-symbol,
-  [data-mode='exhibition'] .viewer-section.is-expanded .audio-symbol {
-    width: 23px;
   }
 }

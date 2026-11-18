@@ -4,21 +4,35 @@
 
 .exhibition-audio-slot {
   margin-bottom: 4px;
+  padding-inline: 18px;
 }
 
 html[data-page='gallery'] .exhibition-audio-slot {
   display: none;
 }
 
-[data-mode='exhibition'] .exhibition-audio-slot .exhibition-aux {
-  width: min(440px, 100%);
-  padding: 0 18px;
+[data-mode='exhibition'] .viewer-section > .exhibition-aux {
+  flex-shrink: 0;
+  align-self: center;
+  margin: 8px;
+  max-width: calc(100% - 16px);
 }
 
-[data-mode='exhibition'] .exhibition-audio-slot .audio-controls {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 20px;
+[data-mode='exhibition']
+  .viewer-section:is(:fullscreen, .is-expanded)
+  .viewer-toolbar:has(> .exhibition-aux) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--audio-control-width) minmax(0, 1fr);
+  gap: 16px;
+}
+
+[data-mode='exhibition'] .viewer-toolbar > .exhibition-aux {
+  grid-column: 2;
+}
+
+[data-mode='exhibition'] .viewer-toolbar:has(> .exhibition-aux) .viewer-actions {
+  grid-column: 3;
+  justify-self: end;
 }
 
 [data-mode='exhibition'] .instrument-panel .exhibition-instrument {
@@ -109,49 +123,18 @@ html[data-page='gallery'] .exhibition-audio-slot {
   min-height: 100%;
 }
 
-[data-mode='exhibition'] .parameter-drawer .exhibition-aux {
-  padding: 14px;
-}
-
-[data-mode='exhibition'] .parameter-drawer .audio-controls {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-}
-
-[data-mode='exhibition'] .parameter-drawer .audio-toggle {
-  font-size: 17px;
-  gap: 7px;
-}
-
-[data-mode='exhibition'] .viewer-section:fullscreen .stage-layout,
-[data-mode='exhibition'] .viewer-section.is-expanded .stage-layout {
-  flex: 1 1 0;
-}
-
-[data-mode='exhibition'] .viewer-section:fullscreen .parameter-drawer .instrument-panel,
-[data-mode='exhibition'] .viewer-section.is-expanded .parameter-drawer .instrument-panel {
-  height: 100%;
-  max-height: none;
-  padding: 18px;
-}
-
-[data-mode='exhibition'] .viewer-section:fullscreen .parameter-drawer .exhibition-instrument,
-[data-mode='exhibition'] .viewer-section.is-expanded .parameter-drawer .exhibition-instrument {
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-}
-
 [data-mode='exhibition'] .viewer-section:is(:fullscreen, .is-expanded) .stage-layout {
-  --drawer-width: clamp(320px, 36%, 460px);
+  flex: 1 1 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 [data-mode='exhibition']
   .viewer-section:is(:fullscreen, .is-expanded)
-  .parameter-drawer
-  .exhibition-panel {
-  width: 100%;
-  height: min(100%, calc(80cqh - 36px), 560px);
+  :is(.parameter-drawer, .parameter-handle),
+[data-mode='exhibition']
+  .viewer-section:is(:fullscreen, .is-expanded):not([data-viewer-state='unavailable'])
+  > .instrument-panel {
+  display: none;
 }
 
 [data-mode='exhibition'] .viewer-section > .instrument-panel {
@@ -205,10 +188,6 @@ html[data-page='gallery'] .exhibition-audio-slot {
     max-width: 620px;
     justify-self: center;
   }
-
-  [data-mode='exhibition'] .exhibition-aux {
-    width: 100%;
-  }
 }
 
 @media (max-width: 760px) {
@@ -226,11 +205,6 @@ html[data-page='gallery'] .exhibition-audio-slot {
 
   [data-mode='exhibition'] .parameter-drawer .instrument-panel {
     padding: 10px;
-  }
-
-  [data-mode='exhibition'] .parameter-drawer .audio-controls {
-    grid-template-columns: 1fr;
-    gap: 6px;
   }
 }
 

@@ -8,6 +8,9 @@ export function createFullscreenControls({
 }) {
   const fullscreenToggle = document.querySelector('#fullscreen-toggle');
   const fullscreenLabel = document.querySelector('#fullscreen-label');
+  const toolbar = viewerSection.querySelector('.viewer-toolbar');
+  const viewerActions = toolbar.querySelector('.viewer-actions');
+  const wideToolbar = matchMedia('(min-width: 900px)');
   const events = new AbortController();
   let resizeFrame = null;
   function isFullscreen() {
@@ -29,8 +32,12 @@ export function createFullscreenControls({
   }
 
   function syncFullscreen() {
-    if (isFullscreen()) viewerSection.prepend(audioPanel);
-    else audioHome.append(audioPanel);
+    const host = isFullscreen() ? (wideToolbar.matches ? toolbar : viewerSection) : audioHome;
+    if (audioPanel.parentElement !== host) {
+      if (host === toolbar) viewerActions.before(audioPanel);
+      else if (host === viewerSection) host.prepend(audioPanel);
+      else host.append(audioPanel);
+    }
     labelFullscreen();
     if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(() => {
@@ -86,6 +93,13 @@ export function createFullscreenControls({
     { signal: events.signal },
   );
   document.addEventListener('fullscreenchange', syncFullscreen, { signal: events.signal });
+  wideToolbar.addEventListener(
+    'change',
+    () => {
+      if (isFullscreen()) syncFullscreen();
+    },
+    { signal: events.signal },
+  );
 
   window.addEventListener(
     'keydown',
